@@ -1,15 +1,47 @@
 import { Avatar, Button, IconButton } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import ChatIcon from "@mui/icons-material/Chat";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
-
+import * as EmailValidator from "email-validator";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
+import Chat from "./Chat";
 const Sidebar = () => {
+  const [user] = useAuthState(auth);
+  const userChatRef = db
+    .collection("chats")
+    .where("users", "array-contains", user.email);
+  const [chatSnapshot] = useCollection(userChatRef);
+  const createChate = () => {
+    const input = prompt("ایمل اونیکه می خوایی باش چت کنی وارد کن برادر ");
+
+    if (!input) return null;
+
+    if (
+      EmailValidator.validate(input) &&
+      !chatAlreadyExists(input) &&
+      input !== user.email
+    ) {
+      db.collection("chats").add({
+        users: [user.email, input],
+      });
+    }
+  };
+
+  const chatAlreadyExists = (recipientEmail) => {
+    return !!chatSnapshot?.docs.find(
+      (chat) =>
+        chat.data().users.find((user) => user === recipientEmail)?.length > 0
+    );
+  };
+
   return (
     <Container>
       <Header>
-        <UserAvatar />
+        <UserAvatar onClick={() => auth.signOut()} />
         <IconsContainer>
           <IconButton>
             <ChatIcon />
@@ -19,9 +51,12 @@ const Sidebar = () => {
       </Header>
       <Search>
         <SearchIcon />
-        <SearchInput />
+        <SearchInput placeholder="Search in Chat" />
       </Search>
-      <SidebarButton>Start a new chate</SidebarButton>
+      <SidebarButton onClick={createChate}>Start a New Chat</SidebarButton>
+      {chatSnapshot?.docs.map((chat) => (
+        <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+      ))}
     </Container>
   );
 };

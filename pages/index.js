@@ -12,7 +12,6 @@ export default function Home() {
       </Head>
 
       <Sidebar />
-      <h1>Lets build Whatsap moras</h1>
     </div>
   );
 }
