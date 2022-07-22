@@ -9,7 +9,7 @@ import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import Chat from "./Chat";
-const Sidebar = () => {
+const Sidebar = ({ isIndex }) => {
   const [user] = useAuthState(auth);
   const userChatRef = db
     .collection("chats")
@@ -39,7 +39,7 @@ const Sidebar = () => {
   };
 
   return (
-    <Container>
+    <Container isIndex={isIndex}>
       <Header>
         <UserAvatar src={user.photoURL} onClick={() => auth.signOut()} />
         <IconsContainer>
@@ -70,7 +70,6 @@ const Container = styled.div`
   min-width: 300px;
   max-width: 350px;
   overflow-y: scroll;
-
   ::-webkit-scrollbar {
     display: none;
   }
@@ -78,7 +77,7 @@ const Container = styled.div`
   scrollbar-width: none;
 
   @media (max-width: 768px) {
-    display: none;
+    max-width: ${(props) => props.isIndex && "100%"};
   }
 `;
 

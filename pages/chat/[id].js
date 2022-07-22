@@ -15,7 +15,9 @@ function Chat({ chat, messages }) {
       <Head>
         <title>Chat with {getRecipientEmail(chat.users, user)}</title>
       </Head>
-      <Sidebar />
+      <ContainerSide>
+        <Sidebar />
+      </ContainerSide>
       <ChatContainer>
         <ChatScreen chat={chat} messages={messages} />
       </ChatContainer>
@@ -72,4 +74,10 @@ const ChatContainer = styled.div`
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+`;
+
+const ContainerSide = styled.div`
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
