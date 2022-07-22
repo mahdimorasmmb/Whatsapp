@@ -1,5 +1,5 @@
 import { Avatar, Button, IconButton } from "@mui/material";
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import ChatIcon from "@mui/icons-material/Chat";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
