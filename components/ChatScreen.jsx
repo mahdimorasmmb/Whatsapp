@@ -44,7 +44,7 @@ function ChatScreen({ chat, messages }) {
         />
       ));
     } else {
-      return JSON.parse(messages).map((message) => (
+      return messages.map((message) => (
         <Message key={message.id} user={message.user} message={message} />
       ));
     }

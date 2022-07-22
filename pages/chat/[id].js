@@ -1,5 +1,6 @@
 import Head from "next/head";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useLayoutEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import ChatScreen from "../../components/ChatScreen";
@@ -7,8 +8,44 @@ import Sidebar from "../../components/Sidebar";
 import { auth, db } from "../../firebase";
 import getRecipientEmail from "../../utils/getRecipientEmail";
 
-function Chat({ chat, messages }) {
+function Chat() {
   const [user] = useAuthState(auth);
+  const [messages, setMessages] = useState("");
+  const [chat, setChats] = useState("");
+  const [loding, setLoding] = useState(true);
+  const router = useRouter();
+
+  async function getData() {
+    setLoding(true);
+    const ref = db.collection("chats").doc(router.query.id);
+
+    const messagesRef = await ref
+      .collection("messages")
+      .orderBy("timestamp", "asc")
+      .get();
+
+    const messages = await messagesRef.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .map((message) => ({
+        ...message,
+        timestamp: message.timestamp.toDate().getTime(),
+      }));
+    const chatRef = await ref.get();
+    const chat = await {
+      id: chatRef.id,
+      ...chatRef.data(),
+    };
+    setChats(chat);
+    setMessages(messages);
+    setLoding(false);
+  }
+
+  useLayoutEffect(() => {
+    getData();
+  }, []);
 
   return (
     <Container>
@@ -19,7 +56,11 @@ function Chat({ chat, messages }) {
         <Sidebar />
       </ContainerSide>
       <ChatContainer>
-        <ChatScreen chat={chat} messages={messages} />
+        {!loding ? (
+          <ChatScreen chat={chat} messages={messages} />
+        ) : (
+          <p>Loddin</p>
+        )}
       </ChatContainer>
     </Container>
   );
@@ -35,7 +76,7 @@ export async function getServerSideProps(context) {
     .orderBy("timestamp", "asc")
     .get();
 
-  const messages = messagesRef.docs
+  const messages = await messagesRef.docs
     .map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -45,7 +86,7 @@ export async function getServerSideProps(context) {
       timestamp: message.timestamp.toDate().getTime(),
     }));
   const chatRef = await ref.get();
-  const chat = {
+  const chat = await {
     id: chatRef.id,
     ...chatRef.data(),
   };
@@ -54,7 +95,7 @@ export async function getServerSideProps(context) {
 
   return {
     props: {
-      messages: JSON.stringify(messages),
+      messages: await JSON.stringify(messages),
       chat,
     },
   };
