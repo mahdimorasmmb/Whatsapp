@@ -6,7 +6,7 @@ import { auth, provider } from "../firebase";
 
 function Login() {
   const signIn = () => {
-    auth.signInWithRedirect(provider).catch(alert);
+    auth.signInWithPopup(provider).catch(alert);
   };
   return (
     <Container>
